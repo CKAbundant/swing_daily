@@ -10,7 +10,7 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-strat-backtest = { path = "../strat_backtest", editable = true }
+strat-backtest = { git = "https://github.com/CKAbundant/strat_backtest.git" }
 
 
 [tool.pylint."MESSAGES CONTROL"]

@@ -1363,7 +1363,7 @@ wheels = [
 [[package]]
 name = "strat-backtest"
 version = "0.1.0"
-source = { editable = "../strat_backtest" }
+source = { git = "https://github.com/CKAbundant/strat_backtest.git#fb8f8fdb1b4fd4d894b67275fb845b8d41240906" }
 dependencies = [
     { name = "fastparquet" },
     { name = "ipykernel" },
@@ -1374,25 +1374,6 @@ dependencies = [
     { name = "pyarrow" },
     { name = "pydantic" },
     { name = "ta-lib" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "fastparquet", specifier = ">=2024.11.0" },
-    { name = "ipykernel", specifier = ">=6.29.5" },
-    { name = "ipywidgets", specifier = ">=8.1.7" },
-    { name = "numpy", specifier = ">=2.2.6" },
-    { name = "pandas", specifier = ">=2.2.3" },
-    { name = "pyarrow", specifier = ">=20.0.0" },
-    { name = "pydantic", specifier = ">=2.11.4" },
-    { name = "ta-lib", specifier = ">=0.6.3" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "black" },
-    { name = "pylint", specifier = ">=3.3.7" },
-    { name = "pytest", specifier = ">=8.3.5" },
 ]
 
 [[package]]
@@ -1414,7 +1395,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "omegaconf", specifier = ">=2.3.0" },
-    { name = "strat-backtest", editable = "../strat_backtest" },
+    { name = "strat-backtest", git = "https://github.com/CKAbundant/strat_backtest.git" },
 ]
 
 [package.metadata.requires-dev]
