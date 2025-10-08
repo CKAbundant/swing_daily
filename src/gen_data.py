@@ -6,12 +6,11 @@
 4) atr
 """
 
-from pprint import pformat
 from typing import Any
 
 import pandas as pd
 import talib
-from strat_backtest.utils import convert_to_decimal, set_datetime, set_decimal_type
+from strat_backtest.utils import set_datetime, set_decimal_type
 
 
 class GenData:
