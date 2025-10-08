@@ -30,5 +30,5 @@ env/
 Thumbs.db
 
 # Personal
-data/
+/data/
 tests/test_fn.py
