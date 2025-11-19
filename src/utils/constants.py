@@ -7,8 +7,8 @@ used throughout the 'swing_daily' repo.
 from enum import Enum
 from typing import Literal
 
-# # Static variables
-# OhlcType = Literal["open", "high", "low", "close"]
+# Static variables
+PeriodUnit = Literal["day", "week", "month"]
 
 
 # Dynamic variables
