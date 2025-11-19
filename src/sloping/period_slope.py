@@ -3,6 +3,7 @@ fixed time period i.e. by days, weeks or months."""
 
 import calendar
 from datetime import datetime, timedelta
+from decimal import Decimal
 
 import pandas as pd
 
@@ -41,28 +42,45 @@ class PeriodSlope(DetSlope):
         self.period = period
         self._validate_period()
 
-    def det_slope(self, df: pd.DataFrame, col_name: str) -> SlopeStatus:
-        """Return either 1 (slope up), 0 (sideway), or -1 (slope down)
+    def det_slope(self, df: pd.DataFrame, var: str) -> SlopeStatus:
+        """Return either 1 (slope up), 0 (sideway), or -1 (slope down) for var
         given OHLC DataFrame.
 
         Args:
             df (pd.DataFrame):
                 DataFrame containing variable to test slope.
-            col_name (str):
-                Name of column in DataFrame that contains the required variable.
+            var (str):
+                Variable used to determine slope.
 
         Returns:
             SlopeStatus:
                 Whether moving average is sloping up, down or sideway.
         """
 
-        df = self._validate_df(df)
+        df = self._format_df(df, var)
 
         # Get latest date
         latest_date = df["date"].max()
 
         # Get start date
         start_date = self._get_start_date(latest_date)
+
+        # Get start and end level to determine slope
+        start_level = self._get_level(df, start_date, var)
+        end_level = self._get_level(df, latest_date, var)
+        percent_change = (end_level - start_level) / start_level
+
+        print(f"\n\nlatest_date : {latest_date} -> {end_level}")
+        print(f"start_date : {start_date} -> {start_level}\n")
+        print(f"percent_change : {percent_change}")
+
+        if percent_change > 0 and percent_change >= self.threshold:
+            return SlopeStatus.up
+
+        if percent_change < 0 and abs(percent_change) >= self.threshold:
+            return SlopeStatus.down
+
+        return SlopeStatus.sideway
 
     def _validate_period(self) -> None:
         """Validate period must be positive."""
@@ -115,3 +133,23 @@ class PeriodSlope(DetSlope):
 
         # Start day remains the same since period is based on month
         return datetime(start_year, start_month, start_date)
+
+    def _get_level(self, df: pd.DataFrame, dt: datetime, var: str) -> Decimal:
+        """Get value of required variable at specific date to determine slope.
+
+        Args:
+            df (pd.DataFrame): DataFrame containing info of required variable.
+            dt (datetime): Date used to determine value of required variable.
+            var (str): Variable used to determine slope.
+
+        Returns:
+            (Decimal): Value of required variable.
+        """
+
+        if "date" not in df.columns:
+            raise ValueError("'date' column is not present in DataFrame.")
+
+        while dt not in df["date"].to_list():
+            dt = dt - timedelta(days=1)
+
+        return df.loc[df["date"] == dt, var].item()
