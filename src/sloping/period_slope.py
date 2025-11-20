@@ -1,21 +1,21 @@
 """Concrete implementation of 'DetSlope' to determine slope based on
 fixed time period i.e. by days, weeks or months."""
 
-import calendar
 from datetime import datetime, timedelta
-from decimal import Decimal
 
 import pandas as pd
 
 from src.sloping.base import DetSlope
 from src.utils.constants import PeriodUnit, SlopeStatus
+from src.utils.utils import cal_percent_change
 
 
 class PeriodSlope(DetSlope):
     """Determine slope based on fixed time period.
 
     Usage:
-        >>> period_slope = PeriodSlope("month", 6)
+        >>> period_slope = PeriodSlope(threshold=0.05, period_unit="month", period=6)
+        # Determine slope for simple moving average (period=20)
         >>> slope = period_slope.det_slope(df, "sma_20")
 
     Args:
@@ -47,14 +47,11 @@ class PeriodSlope(DetSlope):
         given OHLC DataFrame.
 
         Args:
-            df (pd.DataFrame):
-                DataFrame containing variable to test slope.
-            var (str):
-                Variable used to determine slope.
+            df (pd.DataFrame): DataFrame containing variable to test slope.
+            var (str): Variable used to determine slope.
 
         Returns:
-            SlopeStatus:
-                Whether moving average is sloping up, down or sideway.
+            SlopeStatus: Whether moving average is sloping up, down or sideway.
         """
 
         df = self._format_df(df, var)
@@ -62,25 +59,12 @@ class PeriodSlope(DetSlope):
         # Get latest date
         latest_date = df["date"].max()
 
-        # Get start date
-        start_date = self._get_start_date(latest_date)
+        # Compute percentage of 'var'
+        percent_change = cal_percent_change(
+            df, var, latest_date, self.period_unit, self.period
+        )
 
-        # Get start and end level to determine slope
-        start_level = self._get_level(df, start_date, var)
-        end_level = self._get_level(df, latest_date, var)
-        percent_change = (end_level - start_level) / start_level
-
-        print(f"\n\nlatest_date : {latest_date} -> {end_level}")
-        print(f"start_date : {start_date} -> {start_level}\n")
-        print(f"percent_change : {percent_change}")
-
-        if percent_change > 0 and percent_change >= self.threshold:
-            return SlopeStatus.up
-
-        if percent_change < 0 and abs(percent_change) >= self.threshold:
-            return SlopeStatus.down
-
-        return SlopeStatus.sideway
+        return self._compute_slope(percent_change)
 
     def _validate_period(self) -> None:
         """Validate period must be positive."""
@@ -93,63 +77,3 @@ class PeriodSlope(DetSlope):
 
         if self.period_unit not in ["day", "week", "month"]:
             raise ValueError("period unit must be 'day', 'week' or 'month'!")
-
-    def _get_start_date(self, latest_date: datetime) -> datetime:
-        """Get start date based on latest record in DataFrame."""
-        if self.period_unit == "month":
-            return self._get_start_date_by_month(latest_date)
-
-        if self.period_unit == "week":
-            days = self.period * 7
-            return latest_date - timedelta(days=days)
-
-        if self.period_unit == "day":
-            return latest_date - timedelta(days=self.period)
-
-    def _get_start_date_by_month(self, latest_date: datetime) -> datetime:
-        """Get start date if period is based on number of months."""
-
-        current_month = latest_date.month
-        current_year = latest_date.year
-        start_date = latest_date.day
-
-        # Convert periods in months to year and month
-        period_year = self.period // 12
-        period_month = self.period % 12
-
-        # Compute difference between current_month and period_month
-        # and current_year and period_year
-        diff_month = current_month - period_month
-        diff_year = current_year - period_year
-
-        # if diff_month is negative, increment period_year by 1 and
-        # diff_month by 12
-        start_month = diff_month if diff_month > 0 else diff_month + 12
-        start_year = diff_year if diff_month > 0 else diff_year - 1
-
-        # Set start date to last day for start_month and start_year if out of range
-        _, last_day = calendar.monthrange(start_year, start_month)
-        start_date = start_date if latest_date.day <= last_day else last_day
-
-        # Start day remains the same since period is based on month
-        return datetime(start_year, start_month, start_date)
-
-    def _get_level(self, df: pd.DataFrame, dt: datetime, var: str) -> Decimal:
-        """Get value of required variable at specific date to determine slope.
-
-        Args:
-            df (pd.DataFrame): DataFrame containing info of required variable.
-            dt (datetime): Date used to determine value of required variable.
-            var (str): Variable used to determine slope.
-
-        Returns:
-            (Decimal): Value of required variable.
-        """
-
-        if "date" not in df.columns:
-            raise ValueError("'date' column is not present in DataFrame.")
-
-        while dt not in df["date"].to_list():
-            dt = dt - timedelta(days=1)
-
-        return df.loc[df["date"] == dt, var].item()

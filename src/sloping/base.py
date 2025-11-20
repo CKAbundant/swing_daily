@@ -8,6 +8,7 @@
 """
 
 from abc import ABC, abstractmethod
+from decimal import Decimal
 
 import pandas as pd
 from strat_backtest.utils import set_datetime, set_decimal_type
@@ -91,3 +92,14 @@ class DetSlope(ABC):
         df = df.sort_values(by=["date"], ascending=True)
 
         return df
+
+    def _compute_slope(self, percent_change: Decimal) -> SlopeStatus:
+        """Determine slope given percentage change and threshold."""
+
+        if percent_change > 0 and percent_change >= self.threshold:
+            return SlopeStatus.up
+
+        if percent_change < 0 and abs(percent_change) >= self.threshold:
+            return SlopeStatus.down
+
+        return SlopeStatus.sideway
