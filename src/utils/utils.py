@@ -40,9 +40,9 @@ def cal_percent_change(
     end_level = _get_level(df, end_date, var)
     percent_change = (end_level - start_level) / start_level
 
-    # print(f"\n\nlatest_date : {latest_date} -> {end_level}")
-    # print(f"start_date : {start_date} -> {start_level}\n")
-    # print(f"percent_change : {percent_change}")
+    print(f"\n\nlatest_date : {end_date} -> {end_level}")
+    print(f"start_date : {start_date} -> {start_level}\n")
+    print(f"percent_change : {percent_change}")
 
     return percent_change
 
@@ -52,7 +52,7 @@ def _get_start_date(
 ) -> datetime:
     """Get start date based on latest record in DataFrame."""
     if period_unit == "month":
-        return _get_start_date_by_month(end_date)
+        return _get_start_date_by_month(end_date, period)
 
     if period_unit == "week":
         days = period * 7
@@ -62,12 +62,12 @@ def _get_start_date(
         return end_date - timedelta(days=period)
 
 
-def _get_start_date_by_month(self, latest_date: datetime, period: int) -> datetime:
+def _get_start_date_by_month(end_date: datetime, period: int) -> datetime:
     """Get start date if period is based on number of months."""
 
-    current_month = latest_date.month
-    current_year = latest_date.year
-    start_date = latest_date.day
+    current_month = end_date.month
+    current_year = end_date.year
+    start_date = end_date.day
 
     # Convert periods in months to year and month
     period_year = period // 12
@@ -85,7 +85,7 @@ def _get_start_date_by_month(self, latest_date: datetime, period: int) -> dateti
 
     # Set start date to last day for start_month and start_year if out of range
     _, last_day = calendar.monthrange(start_year, start_month)
-    start_date = start_date if latest_date.day <= last_day else last_day
+    start_date = start_date if end_date.day <= last_day else last_day
 
     # Start day remains the same since period is based on month
     return datetime(start_year, start_month, start_date)

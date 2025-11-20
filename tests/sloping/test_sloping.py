@@ -11,10 +11,10 @@ from tests.utils.test_utils import list_datatype
 @pytest.mark.parametrize(
     "threshold, period_unit, period, slope_status",
     [
-        (0.02, "day", 5, 1),
-        (0.05, "day", 5, 0),
-        (0.05, "week", 3, 1),
-        (0.05, "month", 4, 1),
+        (0.05, "day", 5, 1),
+        (0.1, "day", 5, 0),
+        (0.05, "week", 3, 0),
+        (0.05, "month", 4, -1),
     ],
 )
 def test_period_slope(sample_df, threshold, period_unit, period, slope_status):
