@@ -33,11 +33,11 @@ def cal_percent_change(
         raise ValueError(f"{var} is not a column in 'df' DataFrame.")
 
     # Get start date
-    start_date = _get_start_date(end_date, period_unit, period)
+    start_date = get_start_date(end_date, period_unit, period)
 
     # Get start, end level and percent change to determine slope
-    start_level = _get_level(df, start_date, var)
-    end_level = _get_level(df, end_date, var)
+    start_level = get_level(df, start_date, var)
+    end_level = get_level(df, end_date, var)
     percent_change = (end_level - start_level) / start_level
 
     print(f"\n\nlatest_date : {end_date} -> {end_level}")
@@ -47,7 +47,7 @@ def cal_percent_change(
     return percent_change
 
 
-def _get_start_date(
+def get_start_date(
     end_date: datetime, period_unit: PeriodUnit, period: int
 ) -> datetime:
     """Get start date based on latest record in DataFrame."""
@@ -91,7 +91,7 @@ def _get_start_date_by_month(end_date: datetime, period: int) -> datetime:
     return datetime(start_year, start_month, start_date)
 
 
-def _get_level(df: pd.DataFrame, dt: datetime, var: str) -> Decimal:
+def get_level(df: pd.DataFrame, dt: datetime, var: str) -> Decimal:
     """Get value of required variable at specific date to determine slope.
 
     Args:

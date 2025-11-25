@@ -6,24 +6,24 @@ import numpy as np
 import pandas as pd
 import talib
 
-from src.sloping.period_slope import PeriodSlope
+from src.sloping.daily_slope import DailySlope
 from src.utils.utils import cal_percent_change
 from tests.utils.test_utils import list_datatype
 
 
 def test_fn(sample_df):
-    info = [
-        ("week", 1),
-        ("month", 1),
-        ("month", 3),
-        ("month", 6),
+    print(f"\n\n{sample_df}\n")
+
+    a = sample_df.loc[
+        (sample_df["Date"] >= datetime(2025, 4, 12))
+        & (sample_df["Date"] <= datetime(2025, 6, 1)),
+        :,
     ]
+    print(f"\n\n{a}\n")
 
-    df = sample_df.copy()
-    df.columns = [col.lower() for col in df.columns]
+    b = a["Close"].pct_change()
+    b = b.dropna()
 
-    a = np.mean(
-        [cal_percent_change(df, "close", datetime(2025, 5, 15), a, b) for a, b in info]
-    )
-
-    print(f"\n{a}\n")
+    print(f"\n{b}\n")
+    print(f"\n{b.to_numpy()}\n")
+    print(f"{b.to_numpy().mean()}\n")
